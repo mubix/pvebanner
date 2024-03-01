@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+
+use strict;
+use IO::Socket::INET;
+
+sub get_current_ip {
+  my $socket = IO::Socket::INET->new(
+    Proto => 'udp',
+    PeerAddr => '8.8.8.8',
+    PeerPort => '53',
+  ) or die "Could nt create socket: $!\n";
+
+  my $local_addr = $socket->sockhost();
+  return $local_addr;
+}
+
+my $localip = get_current_ip();
+
+my $xline = '-' x 78;
+
+my $banner = '';
+
+if ($localip) {
+    $banner .= <<__EOBANNER;
+
+$xline
+
+Welcome to the Proxmox Virtual Environment. Please use your web browser to 
+configure this server - connect to:
+
+  https://${localip}:8006/
+
+$xline
+
+__EOBANNER
+
+}
+
+open(ISSUE, ">/etc/issue");
+
+print ISSUE $banner;
+
+close(ISSUE);
+
+exit (0);
